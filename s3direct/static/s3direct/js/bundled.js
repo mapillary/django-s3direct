@@ -6018,6 +6018,18 @@ const SparkMD5 = require('spark-md5');
             return headers;
         };
 
+        const getAwsUrl = function(bucketUrl, bucket) {
+          let url = bucketUrl;
+          while (url.endsWith('/')) {
+            url = url.slice(0, url.length-1);
+          }
+          if (url.endsWith(bucket)) {
+            url = url.slice(0, url.length - bucket.length);
+          }
+
+          return url;
+        }
+
         Evaporate.create(
             {
                 //signerUrl: signingUrl,
@@ -6033,6 +6045,7 @@ const SparkMD5 = require('spark-md5');
                 debug: true,
                 allowS3ExistenceOptimization: true,
                 s3FileCacheHoursAgo: 12,
+                aws_url: getAwsUrl(awsBucketUrl, awsBucket),
             }
         ).then(function (evaporate) {
             beginUpload(element);

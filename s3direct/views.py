@@ -53,12 +53,17 @@ def get_upload_params(request):
 
     bucket = dest.get('bucket') or settings.AWS_STORAGE_BUCKET_NAME
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'
-    endpoint = getattr(settings, 'S3DIRECT_ENDPOINT', None) or 's3.amazonaws.com' if region == 'us-east-1' else ('s3-%s.amazonaws.com' % region)
+    endpoint = getattr(settings, 'S3DIRECT_ENDPOINT', None)
+    if not endpoint:
+        endpoint = 's3.amazonaws.com' if region == 'us-east-1' else ('s3-%s.amazonaws.com' % region)
 
     # AWS credentials are not required for publicly-writable buckets
     access_key_id = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
 
-    bucket_url = 'https://{0}/{1}'.format(endpoint, bucket)
+    if not endpoint.startswith('http'):
+        bucket_url = 'https://{0}/{1}'.format(endpoint, bucket)
+    else:
+        bucket_url = '{0}/{1}'.format(endpoint, bucket)
 
     upload_data = {
         'object_key': object_key,
